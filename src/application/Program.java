@@ -1,7 +1,9 @@
 package application;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -10,6 +12,7 @@ import java.util.Locale;
 import java.util.Scanner;
 
 import model.entities.Item;
+import model.entities.UpdatedItem;
 
 public class Program {
 	
@@ -23,6 +26,22 @@ public class Program {
 			bw.write(i.toString());
 			bw.newLine();
 		}
+	}
+	
+	public static List<String[]> readFile(BufferedReader br) throws IOException {
+		List<String[]> lines;
+		String[] itemData;
+		String line;
+		
+		lines = new ArrayList<>();
+		line = br.readLine();
+		while (line != null) {
+			System.out.printf("%s%n", line);
+			itemData = line.split(",");
+			lines.add(itemData);
+			line = br.readLine();
+		}
+		return lines;
 	}
 
 	public static void main(String[] args) {
@@ -50,6 +69,26 @@ public class Program {
 			}
 			items.clear();
 			
+			List<String[]> lines;
+			
+			try (BufferedReader br = new BufferedReader(new FileReader(file.getPath()))) {
+				System.out.printf("%n%s data:%n", file.getName());
+				lines = readFile(br);
+			}
+			for (String[] l: lines)
+				items.add(new UpdatedItem(l[0], Double.parseDouble(l[1]), Integer.parseInt(l[2])));
+			
+			folder = new File(folder.getPath() + "\\out");
+			file = new File(folder.getPath() + "\\summary.csv");
+			createFile(folder, file);
+			try (BufferedWriter bw = new BufferedWriter(new FileWriter(file.getPath()))) {
+				writeFile(items, bw);
+			}
+			try (BufferedReader br = new BufferedReader(new FileReader(file.getPath()))) {
+				System.out.printf("%n%s data:%n", file.getName());
+				readFile(br);
+			}
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}		
@@ -59,4 +98,5 @@ public class Program {
 	}
 
 }
+
 
